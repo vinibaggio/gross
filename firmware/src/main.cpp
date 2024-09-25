@@ -1,18 +1,25 @@
 #include <Arduino.h>
+#include <Bounce2.h>
+
 #include "weights.h"
 #include "sleep.h"
 
-const int powerButton = 0;
-const int tareButton = 1;
+const int POWER_BUTTON_PIN = 0;
+const int TIMER_BUTTON_PIN = 1;
+const int BOUNCE_INTERVAL = 5;
 
 unsigned long buttonPressStartTime = 0;
 bool buttonPressed = false;
 const unsigned long shortPressDuration = 1000; // 1 second
 const unsigned long longPressDuration = 3000;  // 3 seconds
 
+Bounce2::Button powerButton = Bounce2::Button();
+Bounce2::Button timerButton = Bounce2::Button();
+
 void handlePowerButton()
 {
-  bool currentState = digitalRead(powerButton) == HIGH;
+  bool currentState = powerButton.pressed();
+
   Serial.print("Current state: ");
   Serial.println(currentState);
 
@@ -44,8 +51,16 @@ void setup()
     ;
   Serial.println("Serial is ready to accept input");
 
-  pinMode(powerButton, INPUT_PULLUP);
-  pinMode(tareButton, INPUT_PULLUP);
+  Serial.println("Setting up buttons");
+
+  powerButton.attach(POWER_BUTTON_PIN, INPUT_PULLUP);
+  timerButton.attach(TIMER_BUTTON_PIN, INPUT_PULLUP);
+
+  powerButton.interval(BOUNCE_INTERVAL);
+  timerButton.interval(BOUNCE_INTERVAL);
+
+  powerButton.setPressedState(HIGH);
+  timerButton.setPressedState(HIGH);
 
   // setupLoadCell();
 

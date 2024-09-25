@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HX711.h"
+#include <HX711.h>
 
 // Define build profiles
 // HX711 circuit wiring
