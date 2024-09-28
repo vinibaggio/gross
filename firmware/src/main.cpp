@@ -3,6 +3,7 @@
 
 #include "scale.h"
 #include "sleep.h"
+#include "display.h"
 
 const int POWER_BUTTON_PIN = 0;
 const int TIMER_BUTTON_PIN = 1;
@@ -63,12 +64,20 @@ void setup()
   timerButton.setPressedState(HIGH);
 
   setupScale();
+  setupDisplay();
 
   // setupSleep(powerButton);
 }
 
+int seconds = 0;
+
 void loop()
 {
+
+  seconds++;
+
+  displayTimerAndWeight(seconds, seconds * 1.0f);
+
   handlePowerButton();
   // readAndPrintWeight();
   delay(1000);

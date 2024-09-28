@@ -1,5 +1,9 @@
 #pragma once
 
+// Display pins
+#define DISPLAY_SDA_PIN 8
+#define DISPLAY_SCL_PIN 9
+
 // HX711 circuit wiring
 #define LOADCELL_DOUT_PIN_1 3
 #define LOADCELL_SCK_PIN 4 // Shared clock pin
