@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "esp_sleep.h"
 
-#include "weights.h"
+#include "scale.h"
 #include "sleep.h"
 
 void enterLightSleep()
@@ -22,7 +22,7 @@ void enterLightSleep()
 void wakeUpRoutine()
 {
     Serial.println("Waking up from deep sleep");
-    tareScale();
+    scale.tare();
 }
 
 // Add this to your setup() function

@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <Bounce2.h>
 
-#include "weights.h"
+#include "scale.h"
 #include "sleep.h"
 
 const int POWER_BUTTON_PIN = 0;
@@ -35,7 +35,7 @@ void handlePowerButton()
 
     if (pressDuration < shortPressDuration)
     {
-      tareScale();
+      scale.tare();
     }
     else if (pressDuration >= longPressDuration)
     {
@@ -62,7 +62,7 @@ void setup()
   powerButton.setPressedState(HIGH);
   timerButton.setPressedState(HIGH);
 
-  // setupLoadCell();
+  setupScale();
 
   // setupSleep(powerButton);
 }
