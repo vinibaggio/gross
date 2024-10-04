@@ -1,52 +1,20 @@
 #include <Arduino.h>
-#include <Bounce2.h>
 
 #include "scale.h"
 #include "sleep.h"
 #include "display.h"
+#include "wiring.h"
+#include "controls.h"
 
-const int POWER_BUTTON_PIN = 0;
-const int TIMER_BUTTON_PIN = 1;
-const int BOUNCE_INTERVAL = 5;
-
-unsigned long buttonPressStartTime = 0;
-bool buttonPressed = false;
-const unsigned long shortPressDuration = 1000; // 1 second
-const unsigned long longPressDuration = 3000;  // 3 seconds
-
-Bounce2::Button powerButton = Bounce2::Button();
-Bounce2::Button timerButton = Bounce2::Button();
-
-void handlePowerButton()
-{
-  bool currentState = powerButton.pressed();
-
-  Serial.print("Current state: ");
-  Serial.println(currentState);
-
-  if (currentState && !buttonPressed)
-  {
-    buttonPressed = true;
-    buttonPressStartTime = millis();
-  }
-  else if (!currentState && buttonPressed)
-  {
-    unsigned long pressDuration = millis() - buttonPressStartTime;
-    buttonPressed = false;
-
-    if (pressDuration < shortPressDuration)
-    {
-      scale.tare();
-    }
-    else if (pressDuration >= longPressDuration)
-    {
-      enterLightSleep();
-    }
-  }
-}
+unsigned long previousTimer = 0;
+float previousWeight = 0.0;
 
 void setup()
 {
+  // Give the system some time to take boot commands before getting to a tight update loop;
+
+  delay(100);
+
   Serial.begin(115200);
   while (!Serial)
     ;
@@ -54,33 +22,45 @@ void setup()
 
   Serial.println("Setting up buttons");
 
-  powerButton.attach(POWER_BUTTON_PIN, INPUT_PULLUP);
-  timerButton.attach(TIMER_BUTTON_PIN, INPUT_PULLUP);
-
-  powerButton.interval(BOUNCE_INTERVAL);
-  timerButton.interval(BOUNCE_INTERVAL);
-
-  powerButton.setPressedState(HIGH);
-  timerButton.setPressedState(HIGH);
-
+  setupButtons();
   setupScale();
   setupDisplay();
+
+  previousTimer = millis();
 
   // setupSleep(powerButton);
 }
 
-int seconds = 0;
-
 void loop()
 {
+  long currentMillis = millis();
+  int millisDiff = (currentMillis - previousTimer);
 
-  seconds++;
+  u8g2.firstPage();
 
-  displayTimerAndWeight(seconds, seconds * 1.0f);
+  if (millisDiff >= 1000)
+  {
+    previousTimer = currentMillis;
+    do
+    {
+      u8g2.setFont(u8g2_font_VCR_OSD_mu);
+      updateTimerDisplay(currentMillis / 1000);
+    } while (u8g2.nextPage());
+  }
+
+  // if (scale.isReady())
+  // {
+  //   float weight = scale.getTotalWeight();
+  //   if (weight != previousWeight)
+  //   {
+  //     previousWeight = weight;
+  //     updateWeightDisplay(weight);
+  //   }
+  // }
+
+  updateDisplay();
 
   handlePowerButton();
-  // readAndPrintWeight();
-  delay(1000);
 }
 
 // // #include <NimBLEDevice.h>

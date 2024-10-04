@@ -7,43 +7,49 @@
 U8G2_SSD1306_128X32_UNIVISION_1_SW_I2C u8g2(U8G2_R0, DISPLAY_SCL_PIN, DISPLAY_SDA_PIN, /* reset=*/U8X8_PIN_NONE);
 
 #define MAX_DISPLAY_BUFFER_SIZE 11 // characters + null terminator
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 32
 
 void setupDisplay()
 {
     u8g2.begin();
 }
 
-void fillBuffer(char *buffer, char ch, int count)
+void updateTimerDisplay(int totalSeconds)
 {
-    for (int i = 0; i < count; i++)
-    {
-        buffer[i] = ch;
-    }
+    int minutes = totalSeconds / 60;
+    int seconds = totalSeconds % 60;
+
+    // Clear only the timer area
+    u8g2.setDrawColor(0);
+    u8g2.drawBox(0, 0, SCREEN_WIDTH / 2, SCREEN_HEIGHT);
+
+    u8g2.setDrawColor(1);
+    u8g2.setCursor(0, 0);
+    u8g2.printf("%1d:%02d", minutes, seconds);
 }
 
-void displayTimerAndWeight(int timerSeconds, float weight)
+void updateWeightDisplay(float weight)
 {
-    int minutes = timerSeconds / 60;
-    int seconds = timerSeconds % 60;
-
     char weightStr[6];
-    char time[4];
     snprintf(weightStr, sizeof(weightStr), "%.1f", weight);
 
-    char spaces[5];
+    // Clear only the weight area
+    u8g2.setDrawColor(0);
+    u8g2.drawBox(SCREEN_WIDTH / 2, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-    fillBuffer(spaces, ' ', MAX_DISPLAY_BUFFER_SIZE - 4 /* timer */ - 1 /* null */ - strlen(weightStr));
-    // Serial.printf("Spaces: %s\n", strlen(spaces));
+    u8g2.setDrawColor(1);
+    u8g2.setCursor(0, SCREEN_WIDTH - u8g2.getStrWidth(weightStr) - 2); // right aligned + a few pixels
+    u8g2.print(weightStr);
+}
 
-    char buffer[MAX_DISPLAY_BUFFER_SIZE];
+void updateDisplay()
+{
+    // u8g2.sendBuffer();
+}
 
-    snprintf(buffer, sizeof(buffer), "%1d:%02d%s%s", minutes, seconds, spaces, weightStr);
-
-    u8g2.firstPage();
-
-    do
-    {
-        u8g2.setFont(u8g2_font_VCR_OSD_mu);
-        u8g2.drawStr(0, 28, buffer);
-    } while (u8g2.nextPage());
+float getWeight()
+{
+    // Replace this with the actual code to read the weight
+    return random(0, 1000) / 10.0; // Example: Generate a random weight for testing
 }
