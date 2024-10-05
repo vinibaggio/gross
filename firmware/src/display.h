@@ -10,8 +10,8 @@ void setupDisplay()
 {
     u8x8.begin();
     u8x8.setFont(u8x8_font_8x13B_1x2_r);
-    u8x8.setBusClock(400000);
-    u8x8.draw1x2String(1, 1, "00:00    0.0G");
+    u8x8.setBusClock(200000);
+    u8x8.draw1x2String(1, 1, "00:00     0.0G");
 }
 
 void updateTimerDisplay(int totalSeconds)
@@ -44,7 +44,7 @@ void updateTimerDisplay(int totalSeconds)
         }
     }
 
-    previousSeconds = totalSeconds;
+    previousTotal = totalSeconds;
 }
 
 void updateWeightDisplay(float weight)
@@ -56,14 +56,15 @@ void updateWeightDisplay(float weight)
         return;
     }
 
-    const int weightStrLength = 7; // 1000.0G
+    // We skip the G from grams, rendered once in the beginning
+    const int weightStrLength = 6; // 1000.0
     char currentWeightStr[weightStrLength + 1];
     char previousWeightStr[weightStrLength + 1];
 
-    sprintf(currentWeightStr, "%4.1fG", weight);
-    sprintf(previousWeightStr, "%4.1fG", previousWeight);
+    sprintf(currentWeightStr, "%6.1f", weight);
+    sprintf(previousWeightStr, "%6.1f", previousWeight);
 
-    int rightAligned = u8x8.getCols() - weightStrLength;
+    int rightAligned = u8x8.getCols() - weightStrLength - 2; // -1 so we don't overwrite the G and another for right padding
     for (int i = 0; i < weightStrLength; i++)
     {
         if (currentWeightStr[i] != previousWeightStr[i])
