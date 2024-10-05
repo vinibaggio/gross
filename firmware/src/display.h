@@ -1,55 +1,76 @@
 #pragma once
 
-#include <U8g2lib.h>
+#include <U8x8lib.h>
 
 #include "wiring.h"
 
-U8G2_SSD1306_128X32_UNIVISION_1_SW_I2C u8g2(U8G2_R0, DISPLAY_SCL_PIN, DISPLAY_SDA_PIN, /* reset=*/U8X8_PIN_NONE);
-
-#define MAX_DISPLAY_BUFFER_SIZE 11 // characters + null terminator
-#define SCREEN_WIDTH 128
-#define SCREEN_HEIGHT 32
+U8X8_SSD1306_128X32_UNIVISION_SW_I2C u8x8(DISPLAY_SCL_PIN, DISPLAY_SDA_PIN);
 
 void setupDisplay()
 {
-    u8g2.begin();
+    u8x8.begin();
+    u8x8.setFont(u8x8_font_8x13B_1x2_r);
+    u8x8.setBusClock(400000);
+    u8x8.draw1x2String(1, 1, "00:00    0.0G");
 }
 
 void updateTimerDisplay(int totalSeconds)
 {
-    int minutes = totalSeconds / 60;
-    int seconds = totalSeconds % 60;
+    static int previousTotal = 0;
+    // fastest drawing is no drawing at all
+    if (totalSeconds == previousTotal)
+    {
+        return;
+    }
 
-    // Clear only the timer area
-    u8g2.setDrawColor(0);
-    u8g2.drawBox(0, 0, SCREEN_WIDTH / 2, SCREEN_HEIGHT);
+    int currentMinutes = totalSeconds / 60;
+    int currentSeconds = totalSeconds % 60;
 
-    u8g2.setDrawColor(1);
-    u8g2.setCursor(0, 0);
-    u8g2.printf("%1d:%02d", minutes, seconds);
+    int previousMinutes = previousTotal / 60;
+    int previousSeconds = previousTotal % 60;
+
+    const int clockStrLength = 5; // 00:00
+    char previousClock[clockStrLength + 1];
+    char currentClock[clockStrLength + 1];
+
+    sprintf(previousClock, "%02d:%02d", previousMinutes, previousSeconds);
+    sprintf(currentClock, "%02d:%02d", currentMinutes, currentSeconds);
+
+    for (int i = 0; i <= clockStrLength; i++)
+    {
+        if (currentClock[i] != previousClock[i])
+        {
+            u8x8.draw1x2Glyph(i + 1, 1, currentClock[i]);
+        }
+    }
+
+    previousSeconds = totalSeconds;
 }
 
 void updateWeightDisplay(float weight)
 {
-    char weightStr[6];
-    snprintf(weightStr, sizeof(weightStr), "%.1f", weight);
+    static float previousWeight = 0.0f;
+    // fastest drawing is no drawing at all
+    if (weight == previousWeight)
+    {
+        return;
+    }
 
-    // Clear only the weight area
-    u8g2.setDrawColor(0);
-    u8g2.drawBox(SCREEN_WIDTH / 2, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    const int weightStrLength = 7; // 1000.0G
+    char currentWeightStr[weightStrLength + 1];
+    char previousWeightStr[weightStrLength + 1];
 
-    u8g2.setDrawColor(1);
-    u8g2.setCursor(0, SCREEN_WIDTH - u8g2.getStrWidth(weightStr) - 2); // right aligned + a few pixels
-    u8g2.print(weightStr);
-}
+    sprintf(currentWeightStr, "%4.1fG", weight);
+    sprintf(previousWeightStr, "%4.1fG", previousWeight);
 
-void updateDisplay()
-{
-    // u8g2.sendBuffer();
-}
+    int rightAligned = u8x8.getCols() - weightStrLength;
+    for (int i = 0; i < weightStrLength; i++)
+    {
+        if (currentWeightStr[i] != previousWeightStr[i])
+        {
+            u8x8.draw1x2Glyph(rightAligned + i, 1, currentWeightStr[i]);
+        }
+    }
 
-float getWeight()
-{
-    // Replace this with the actual code to read the weight
-    return random(0, 1000) / 10.0; // Example: Generate a random weight for testing
+    previousWeight = weight;
 }

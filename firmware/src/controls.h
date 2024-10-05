@@ -31,8 +31,8 @@ void handlePowerButton()
 {
     bool currentState = powerButton.pressed();
 
-    Serial.print("Current state: ");
-    Serial.println(currentState);
+    // Serial.print("Current state: ");
+    // Serial.println(currentState);
 
     if (currentState && !buttonPressed)
     {

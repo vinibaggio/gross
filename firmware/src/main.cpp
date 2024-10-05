@@ -31,22 +31,21 @@ void setup()
   // setupSleep(powerButton);
 }
 
+long number = 0;
+
 void loop()
 {
   long currentMillis = millis();
   int millisDiff = (currentMillis - previousTimer);
 
-  u8g2.firstPage();
-
-  if (millisDiff >= 1000)
-  {
-    previousTimer = currentMillis;
-    do
-    {
-      u8g2.setFont(u8g2_font_VCR_OSD_mu);
-      updateTimerDisplay(currentMillis / 1000);
-    } while (u8g2.nextPage());
-  }
+  // if (millisDiff >= 5)
+  // {
+  // previousTimer = currentMillis;
+  number += 1;
+  long timer = millis();
+  updateTimerDisplay(timer / 1000);
+  updateWeightDisplay(number / 10.0f);
+  // }
 
   // if (scale.isReady())
   // {
@@ -57,8 +56,6 @@ void loop()
   //     updateWeightDisplay(weight);
   //   }
   // }
-
-  updateDisplay();
 
   handlePowerButton();
 }
