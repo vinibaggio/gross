@@ -16,11 +16,11 @@ void setup()
   delay(100);
 
   Serial.begin(115200);
-  while (!Serial)
-    ;
-  Serial.println("Serial is ready to accept input");
+  // while (!Serial)
+  //   ;
+  // Serial.println("Serial is ready to accept input");
 
-  Serial.println("Setting up buttons");
+  // Serial.println("Setting up buttons");
 
   setupButtons();
   setupScale();
