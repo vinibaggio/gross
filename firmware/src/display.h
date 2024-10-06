@@ -1,49 +1,77 @@
 #pragma once
 
-#include <U8g2lib.h>
+#include <U8x8lib.h>
 
 #include "wiring.h"
 
-U8G2_SSD1306_128X32_UNIVISION_1_SW_I2C u8g2(U8G2_R0, DISPLAY_SCL_PIN, DISPLAY_SDA_PIN, /* reset=*/U8X8_PIN_NONE);
-
-#define MAX_DISPLAY_BUFFER_SIZE 11 // characters + null terminator
+U8X8_SSD1306_128X32_UNIVISION_SW_I2C u8x8(DISPLAY_SCL_PIN, DISPLAY_SDA_PIN);
 
 void setupDisplay()
 {
-    u8g2.begin();
+    u8x8.begin();
+    u8x8.setFont(u8x8_font_8x13B_1x2_r);
+    u8x8.setBusClock(200000);
+    u8x8.draw1x2String(1, 1, "00:00     0.0G");
 }
 
-void fillBuffer(char *buffer, char ch, int count)
+void updateTimerDisplay(int totalSeconds)
 {
-    for (int i = 0; i < count; i++)
+    static int previousTotal = 0;
+    // fastest drawing is no drawing at all
+    if (totalSeconds == previousTotal)
     {
-        buffer[i] = ch;
+        return;
     }
+
+    int currentMinutes = totalSeconds / 60;
+    int currentSeconds = totalSeconds % 60;
+
+    int previousMinutes = previousTotal / 60;
+    int previousSeconds = previousTotal % 60;
+
+    const int clockStrLength = 5; // 00:00
+    char previousClock[clockStrLength + 1];
+    char currentClock[clockStrLength + 1];
+
+    sprintf(previousClock, "%02d:%02d", previousMinutes, previousSeconds);
+    sprintf(currentClock, "%02d:%02d", currentMinutes, currentSeconds);
+
+    for (int i = 0; i <= clockStrLength; i++)
+    {
+        if (currentClock[i] != previousClock[i])
+        {
+            u8x8.draw1x2Glyph(i + 1, 1, currentClock[i]);
+        }
+    }
+
+    previousTotal = totalSeconds;
 }
 
-void displayTimerAndWeight(int timerSeconds, float weight)
+void updateWeightDisplay(float weight)
 {
-    int minutes = timerSeconds / 60;
-    int seconds = timerSeconds % 60;
-
-    char weightStr[6];
-    char time[4];
-    snprintf(weightStr, sizeof(weightStr), "%.1f", weight);
-
-    char spaces[5];
-
-    fillBuffer(spaces, ' ', MAX_DISPLAY_BUFFER_SIZE - 4 /* timer */ - 1 /* null */ - strlen(weightStr));
-    // Serial.printf("Spaces: %s\n", strlen(spaces));
-
-    char buffer[MAX_DISPLAY_BUFFER_SIZE];
-
-    snprintf(buffer, sizeof(buffer), "%1d:%02d%s%s", minutes, seconds, spaces, weightStr);
-
-    u8g2.firstPage();
-
-    do
+    static float previousWeight = 0.0f;
+    // fastest drawing is no drawing at all
+    if (weight == previousWeight)
     {
-        u8g2.setFont(u8g2_font_VCR_OSD_mu);
-        u8g2.drawStr(0, 28, buffer);
-    } while (u8g2.nextPage());
+        return;
+    }
+
+    // We skip the G from grams, rendered once in the beginning
+    const int weightStrLength = 6; // 1000.0
+    char currentWeightStr[weightStrLength + 1];
+    char previousWeightStr[weightStrLength + 1];
+
+    sprintf(currentWeightStr, "%6.1f", weight);
+    sprintf(previousWeightStr, "%6.1f", previousWeight);
+
+    int rightAligned = u8x8.getCols() - weightStrLength - 2; // -1 so we don't overwrite the G and another for right padding
+    for (int i = 0; i < weightStrLength; i++)
+    {
+        if (currentWeightStr[i] != previousWeightStr[i])
+        {
+            u8x8.draw1x2Glyph(rightAligned + i, 1, currentWeightStr[i]);
+        }
+    }
+
+    previousWeight = weight;
 }

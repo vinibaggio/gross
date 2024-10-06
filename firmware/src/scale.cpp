@@ -21,6 +21,14 @@ void Scale::setCalibrationFactor(float factor)
     }
 }
 
+// void Scale::sleep()
+// {
+//     for (auto cell : this->loadCells)
+//     {
+//         cell->power_down();
+//     }
+// }
+
 void Scale::tare()
 {
     for (auto cell : loadCells)
@@ -46,6 +54,8 @@ float Scale::getTotalWeight()
     float totalWeight = 0;
     for (auto cell : loadCells)
     {
+        Serial.print("Reading scale: ");
+        Serial.println(cell->get_units());
         totalWeight += cell->get_units();
     }
     return totalWeight;
@@ -61,20 +71,6 @@ void setupScale()
 
     scale.setCalibrationFactor(calibration_factor);
     scale.tare();
-}
-
-void readAndPrintWeight()
-{
-    if (scale.isReady())
-    {
-        float totalWeight = scale.getTotalWeight();
-        Serial.print("Total Weight: ");
-        Serial.println(totalWeight, 1);
-    }
-    else
-    {
-        Serial.println("HX711 not ready yet.");
-    }
 }
 
 void tareScale()

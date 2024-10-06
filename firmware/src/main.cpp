@@ -1,86 +1,63 @@
 #include <Arduino.h>
-#include <Bounce2.h>
 
 #include "scale.h"
 #include "sleep.h"
 #include "display.h"
+#include "wiring.h"
+#include "controls.h"
 
-const int POWER_BUTTON_PIN = 0;
-const int TIMER_BUTTON_PIN = 1;
-const int BOUNCE_INTERVAL = 5;
-
-unsigned long buttonPressStartTime = 0;
-bool buttonPressed = false;
-const unsigned long shortPressDuration = 1000; // 1 second
-const unsigned long longPressDuration = 3000;  // 3 seconds
-
-Bounce2::Button powerButton = Bounce2::Button();
-Bounce2::Button timerButton = Bounce2::Button();
-
-void handlePowerButton()
-{
-  bool currentState = powerButton.pressed();
-
-  Serial.print("Current state: ");
-  Serial.println(currentState);
-
-  if (currentState && !buttonPressed)
-  {
-    buttonPressed = true;
-    buttonPressStartTime = millis();
-  }
-  else if (!currentState && buttonPressed)
-  {
-    unsigned long pressDuration = millis() - buttonPressStartTime;
-    buttonPressed = false;
-
-    if (pressDuration < shortPressDuration)
-    {
-      scale.tare();
-    }
-    else if (pressDuration >= longPressDuration)
-    {
-      enterLightSleep();
-    }
-  }
-}
+unsigned long previousTimer = 0;
+float previousWeight = 0.0;
 
 void setup()
 {
+  // Give the system some time to take boot commands before getting to a tight update loop;
+
+  delay(100);
+
   Serial.begin(115200);
-  while (!Serial)
-    ;
-  Serial.println("Serial is ready to accept input");
+  // while (!Serial)
+  //   ;
+  // Serial.println("Serial is ready to accept input");
 
-  Serial.println("Setting up buttons");
+  // Serial.println("Setting up buttons");
 
-  powerButton.attach(POWER_BUTTON_PIN, INPUT_PULLUP);
-  timerButton.attach(TIMER_BUTTON_PIN, INPUT_PULLUP);
-
-  powerButton.interval(BOUNCE_INTERVAL);
-  timerButton.interval(BOUNCE_INTERVAL);
-
-  powerButton.setPressedState(HIGH);
-  timerButton.setPressedState(HIGH);
-
+  setupButtons();
   setupScale();
   setupDisplay();
+
+  previousTimer = millis();
 
   // setupSleep(powerButton);
 }
 
-int seconds = 0;
+long number = 0;
 
 void loop()
 {
+  long currentMillis = millis();
+  int millisDiff = (currentMillis - previousTimer);
 
-  seconds++;
+  // if (millisDiff >= 5)
+  // {
+  // previousTimer = currentMillis;
+  number += 1;
+  long timer = millis();
+  updateTimerDisplay(timer / 1000);
+  updateWeightDisplay(number / 10.0f);
+  // }
 
-  displayTimerAndWeight(seconds, seconds * 1.0f);
+  // if (scale.isReady())
+  // {
+  //   float weight = scale.getTotalWeight();
+  //   if (weight != previousWeight)
+  //   {
+  //     previousWeight = weight;
+  //     updateWeightDisplay(weight);
+  //   }
+  // }
 
   handlePowerButton();
-  // readAndPrintWeight();
-  delay(1000);
 }
 
 // // #include <NimBLEDevice.h>
