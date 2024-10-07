@@ -1,3 +1,4 @@
+#include "log.h"
 #include "scale.h"
 #include "wiring.h"
 
@@ -54,8 +55,8 @@ float Scale::getTotalWeight()
     float totalWeight = 0;
     for (auto cell : loadCells)
     {
-        Serial.print("Reading scale: ");
-        Serial.println(cell->get_units());
+        log("Reading scale: ");
+        logln(cell->get_units());
         totalWeight += cell->get_units();
     }
     return totalWeight;
@@ -75,6 +76,6 @@ void setupScale()
 
 void tareScale()
 {
-    Serial.println("Taring scale");
+    logln("Taring scale");
     scale.tare();
 }

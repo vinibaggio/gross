@@ -3,6 +3,7 @@
 #include <Bounce2.h>
 #include <Arduino.h>
 
+#include "log.h"
 #include "wiring.h"
 
 const int BOUNCE_INTERVAL = 5;
@@ -31,8 +32,8 @@ void handlePowerButton()
 {
     bool currentState = powerButton.pressed();
 
-    // Serial.print("Current state: ");
-    // Serial.println(currentState);
+    log("Current state: ");
+    logln(currentState);
 
     if (currentState && !buttonPressed)
     {

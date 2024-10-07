@@ -1,5 +1,6 @@
 #include <Arduino.h>
 
+#include "log.h"
 #include "scale.h"
 #include "sleep.h"
 #include "display.h"
@@ -15,12 +16,11 @@ void setup()
 
   delay(100);
 
-  Serial.begin(115200);
-  // while (!Serial)
-  //   ;
-  // Serial.println("Serial is ready to accept input");
-
-  // Serial.println("Setting up buttons");
+  if (Serial)
+  {
+    Serial.begin(115200);
+  }
+  logln("Setting up buttons");
 
   setupButtons();
   setupScale();
@@ -38,14 +38,10 @@ void loop()
   long currentMillis = millis();
   int millisDiff = (currentMillis - previousTimer);
 
-  // if (millisDiff >= 5)
-  // {
-  // previousTimer = currentMillis;
   number += 1;
   long timer = millis();
   updateTimerDisplay(timer / 1000);
   updateWeightDisplay(number / 10.0f);
-  // }
 
   // if (scale.isReady())
   // {
@@ -112,7 +108,7 @@ void loop()
 
 // //   // Start advertising
 // //   pServer->getAdvertising()->start();
-// //   Serial.println("BLE device is now advertising");
+// //   logln("BLE device is now advertising");
 // // }
 
 // // void loop() {
@@ -142,9 +138,9 @@ void loop()
 
 // //     // Print the smoothed weight
 // //     Serial.print("Smoothed Total Weight: ");
-// //     Serial.println(smoothedWeight);
+// //     logln(smoothedWeight);
 // //   } else {
-// //     Serial.println("HX711 not found.");
+// //     logln("HX711 not found.");
 // //   }
 
 // //   delay(1000); // Adjust delay as needed

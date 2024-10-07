@@ -1,27 +1,28 @@
 #include <Arduino.h>
-#include "esp_sleep.h"
+#include <esp_sleep.h>
 
+#include "log.h"
 #include "scale.h"
 #include "sleep.h"
 
 void enterLightSleep()
 {
-    Serial.println("Entering deep sleep");
+    logln("Entering deep sleep");
     const esp_err_t err = esp_light_sleep_start();
     if (err != ESP_OK)
     {
-        Serial.print("Error: ");
-        Serial.println(err);
+        log("Error: ");
+        logln(err);
     }
     else
     {
-        Serial.println("Woken up from light sleep");
+        logln("Woken up from light sleep");
     }
 }
 
 void wakeUpRoutine()
 {
-    Serial.println("Waking up from deep sleep");
+    logln("Waking up from deep sleep");
     scale.tare();
 }
 
@@ -29,8 +30,8 @@ void wakeUpRoutine()
 void setupWakeUpRoutine()
 {
     esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
-    Serial.print("Wakeup reason: ");
-    Serial.println(wakeup_reason);
+    log("Wakeup reason: ");
+    logln(wakeup_reason);
     if (wakeup_reason == ESP_SLEEP_WAKEUP_GPIO)
     {
         wakeUpRoutine();
