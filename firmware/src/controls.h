@@ -1,57 +1,31 @@
 #pragma once
 
-#include <Bounce2.h>
 #include <Arduino.h>
 
 #include "log.h"
 #include "wiring.h"
 
-const int BOUNCE_INTERVAL = 5;
-
-unsigned long buttonPressStartTime = 0;
-bool buttonPressed = false;
 const unsigned long shortPressDuration = 1000; // 1 second
 const unsigned long longPressDuration = 3000;  // 3 seconds
 
-Bounce2::Button powerButton = Bounce2::Button();
-Bounce2::Button timerButton = Bounce2::Button();
-
-void setupButtons()
+inline void setupButtons()
 {
-    powerButton.attach(POWER_BUTTON_PIN, INPUT_PULLUP);
-    timerButton.attach(TIMER_BUTTON_PIN, INPUT_PULLUP);
-
-    powerButton.interval(BOUNCE_INTERVAL);
-    timerButton.interval(BOUNCE_INTERVAL);
-
-    powerButton.setPressedState(HIGH);
-    timerButton.setPressedState(HIGH);
+    pinMode(POWER_BUTTON_PIN, INPUT_PULLUP);
+    pinMode(TIMER_BUTTON_PIN, INPUT_PULLUP);
 }
 
 void handlePowerButton()
 {
-    bool currentState = powerButton.pressed();
+    bool powerState = digitalRead(POWER_BUTTON_PIN) == HIGH;
+    bool timerState = digitalRead(TIMER_BUTTON_PIN) == HIGH;
 
-    log("Current state: ");
-    logln(currentState);
+    log("Current state - power ");
+    log(powerState);
+    log(" tare ");
+    logln(timerState);
 
-    if (currentState && !buttonPressed)
+    if (powerState)
     {
-        buttonPressed = true;
-        buttonPressStartTime = millis();
-    }
-    else if (!currentState && buttonPressed)
-    {
-        unsigned long pressDuration = millis() - buttonPressStartTime;
-        buttonPressed = false;
-
-        if (pressDuration < shortPressDuration)
-        {
-            scale.tare();
-        }
-        else if (pressDuration >= longPressDuration)
-        {
-            enterLightSleep();
-        }
+        enterLightSleep();
     }
 }

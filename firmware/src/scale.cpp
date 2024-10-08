@@ -62,6 +62,22 @@ float Scale::getTotalWeight()
     return totalWeight;
 }
 
+void Scale::sleep()
+{
+    for (auto cell : loadCells)
+    {
+        cell->power_down();
+    }
+}
+
+void Scale::wake()
+{
+    for (auto cell : loadCells)
+    {
+        cell->power_up();
+    }
+}
+
 void setupScale()
 {
     scale.addLoadCell(&loadCell1, LOADCELL_DOUT_PIN_1, LOADCELL_SCK_PIN);

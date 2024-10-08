@@ -1,5 +1,7 @@
 #include <Arduino.h>
 
+#define DEBUG 1
+
 #include "log.h"
 #include "scale.h"
 #include "sleep.h"
@@ -16,10 +18,9 @@ void setup()
 
   delay(100);
 
-  if (Serial)
-  {
-    Serial.begin(115200);
-  }
+#ifdef DEBUG
+  Serial.begin(115200);
+#endif
   logln("Setting up buttons");
 
   setupButtons();
@@ -31,29 +32,22 @@ void setup()
   // setupSleep(powerButton);
 }
 
-long number = 0;
-
 void loop()
 {
   long currentMillis = millis();
   int millisDiff = (currentMillis - previousTimer);
 
-  number += 1;
   long timer = millis();
   updateTimerDisplay(timer / 1000);
-  updateWeightDisplay(number / 10.0f);
 
-  // if (scale.isReady())
-  // {
-  //   float weight = scale.getTotalWeight();
-  //   if (weight != previousWeight)
-  //   {
-  //     previousWeight = weight;
-  //     updateWeightDisplay(weight);
-  //   }
-  // }
+  if (scale.isReady())
+  {
+    float weight = scale.getTotalWeight();
+    updateWeightDisplay(weight);
+  }
 
   handlePowerButton();
+  delay(100);
 }
 
 // // #include <NimBLEDevice.h>

@@ -14,6 +14,9 @@ public:
     void tare();
     bool isReady();
     float getTotalWeight();
+    void sleep();
+    void wake();
+    // TODO move this to a lifecycle management interface
 };
 
 extern Scale scale;

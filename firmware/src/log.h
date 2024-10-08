@@ -13,7 +13,7 @@
 
 #define logln(...) \
     if (Serial)    \
-        logln(__VA_ARGS__);
+        Serial.println(__VA_ARGS__);
 #else
 #define log(...) ;
 #define logf(...) ;

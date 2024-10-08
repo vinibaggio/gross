@@ -4,10 +4,16 @@
 #include "log.h"
 #include "scale.h"
 #include "sleep.h"
+#include "wiring.h"
+#include "display.h"
 
 void enterLightSleep()
 {
     logln("Entering deep sleep");
+
+    sleepDisplay();
+    scale.sleep();
+
     const esp_err_t err = esp_light_sleep_start();
     if (err != ESP_OK)
     {
@@ -23,6 +29,8 @@ void enterLightSleep()
 void wakeUpRoutine()
 {
     logln("Waking up from deep sleep");
+    scale.wake();
+    wakeDisplay();
     scale.tare();
 }
 
@@ -38,9 +46,8 @@ void setupWakeUpRoutine()
     }
 }
 
-void setupSleep(int powerButton)
+void setupSleep()
 {
-    pinMode(powerButton, INPUT_PULLUP);
-    gpio_wakeup_enable((gpio_num_t)powerButton, GPIO_INTR_HIGH_LEVEL);
+    gpio_wakeup_enable((gpio_num_t)POWER_BUTTON_PIN, GPIO_INTR_HIGH_LEVEL);
     esp_sleep_enable_gpio_wakeup();
 }
